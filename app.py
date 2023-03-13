@@ -90,7 +90,7 @@ def hashed_password(s):
 
 @app.route("/")
 def hello_world():
-    return "Hi! I am APSIT - Community's Backend"
+    return "Hello! This is APSIT - Community's Backend"
 
 
 # CREATE ACCOUNT
