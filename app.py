@@ -295,7 +295,7 @@ def delete_post(current_user):
 def user_post(current_user):
     if request.method == "POST":
         json_object = request.json
-        post = post_info.find({"author.moodleId": json_object['moodleId']})
+        post = post_info.find({"author.moodleId": json_object['moodleId']}).sort("_id", -1)
         post_json = jsoner(post)
         return {"post": post_json}, 200
 
