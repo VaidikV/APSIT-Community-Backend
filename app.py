@@ -25,7 +25,7 @@ Database = client.get_database("ApsitDB")
 
 login_info = Database.logininfo
 post_info = Database.Postinfo
-
+internships = Database.Internships
 
 # ------------------------------- TOOLS -------------------------------
 
