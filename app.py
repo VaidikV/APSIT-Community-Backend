@@ -91,7 +91,7 @@ def hashed_password(s):
 
 @app.route("/")
 def hello_world():
-    return "Hi! I am APSIT - Community's Backend"
+    return "Hello! This is APSIT - Community's Backend"
 
 
 # CREATE ACCOUNT
@@ -126,7 +126,7 @@ def add_user():
         access_token = jwt.encode(
             {
                 "user": json_object["moodleId"],
-                "exp": datetime.utcnow() + timedelta(hours=6)
+                "exp": datetime.utcnow() + timedelta(hours=2)
             },
             app.config["SECRET_KEY"])
 
@@ -224,7 +224,8 @@ def get_posts(current_user):
         posts = post_info.find({}, {
             "cover": 0, "content": 0,
             "author.avatarUrl": 0,
-            "author.moodleId": 0
+            "author.moodleId": 0,
+            "comment": 0
         }).sort("_id", -1)
 
         posts_json = jsoner(posts)
@@ -292,7 +293,7 @@ def delete_post(current_user):
 #  ALL POSTS OF A SPECIFIC USER
 @app.route("/user-post", methods=["POST"])
 @token_required
-def user_post():
+def user_post(current_user):
     if request.method == "POST":
         json_object = request.json
         post = post_info.find({"author.moodleId": json_object['moodleId']}).sort("_id", -1)
@@ -382,8 +383,8 @@ def bookmark(current_user):
 # ------------------------------- INTERNSHIP API -------------------------------
 
 @app.route("/internships", methods=["POST"])
-# @token_required
-def fetch_internships():
+@token_required
+def fetch_internships(current_user):
     json_object = request.json
 
     if request.method == "POST":
@@ -397,3 +398,5 @@ def fetch_internships():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
