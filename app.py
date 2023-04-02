@@ -126,7 +126,7 @@ def add_user():
         access_token = jwt.encode(
             {
                 "user": json_object["moodleId"],
-                "exp": datetime.utcnow() + timedelta(hours=2)
+                "exp": datetime.utcnow() + timedelta(hours=6)
             },
             app.config["SECRET_KEY"])
 
