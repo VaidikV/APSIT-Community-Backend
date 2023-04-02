@@ -46,7 +46,7 @@ def token_required(f):
             }), 401
 
         try:
-            data = jwt.decode(token, application.config["SECRET_KEY"], algorithms="HS256")
+            data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
 
             current_user = login_info.find_one({
                 "moodleId": data["user"]
@@ -71,7 +71,7 @@ def token_required(f):
 
 
 # JWT Authentication
-@application.route("/get-user", methods=["GET", "POST"])
+@app.route("/get-user", methods=["GET", "POST"])
 @token_required
 def get_user(current_user):
     return jsoner(current_user)
@@ -89,13 +89,13 @@ def hashed_password(s):
 
 # ------------------------------- USER API -------------------------------
 
-@application.route("/")
+@app.route("/")
 def hello_world():
     return "Hello! This is APSIT - Community's Backend"
 
 
 # CREATE ACCOUNT
-@application.route("/add-user", methods=["POST"])
+@app.route("/add-user", methods=["POST"])
 def add_user():
     if request.method == "POST":
         json_object = request.json
@@ -128,7 +128,7 @@ def add_user():
                 "user": json_object["moodleId"],
                 "exp": datetime.utcnow() + timedelta(hours=2)
             },
-            application.config["SECRET_KEY"])
+            app.config["SECRET_KEY"])
 
         # sending the relevant information back to the front-end
         new_user.pop("password")
@@ -139,7 +139,7 @@ def add_user():
 
 
 # LOG IN
-@application.route("/find-user", methods=["POST"])
+@app.route("/find-user", methods=["POST"])
 def find_user():
     if request.method == "POST":
         json_object = request.json
@@ -156,7 +156,7 @@ def find_user():
                         "user": json_object["moodleId"],
                         "exp": datetime.utcnow() + timedelta(hours=2)
                     },
-                    application.config["SECRET_KEY"]
+                    app.config["SECRET_KEY"]
                 )
 
                 user_in_db.pop("password")
@@ -171,7 +171,7 @@ def find_user():
 
 
 # UPDATE
-@application.route("/update-user", methods=["POST"])
+@app.route("/update-user", methods=["POST"])
 @token_required
 def update_user(current_user):
     if request.method == "POST":
@@ -187,7 +187,7 @@ def update_user(current_user):
 
 
 # DELETE
-@application.route("/delete-user", methods=["POST"])
+@app.route("/delete-user", methods=["POST"])
 @token_required
 def delete_user(current_user):
     json_object = request.json
@@ -203,7 +203,7 @@ def delete_user(current_user):
 
 
 # CREATE
-@application.route("/create-post", methods=["POST"])
+@app.route("/create-post", methods=["POST"])
 @token_required
 def create_post(current_user):
     if request.method == "POST":
@@ -217,7 +217,7 @@ def create_post(current_user):
 
 
 # READ
-@application.route("/posts", methods=["GET"])
+@app.route("/posts", methods=["GET"])
 @token_required
 def get_posts(current_user):
     if request.method == "GET":
@@ -233,7 +233,7 @@ def get_posts(current_user):
 
 
 # READ SPECIFIC POST
-@application.route("/post", methods=["GET"])
+@app.route("/post", methods=["GET"])
 @token_required
 def post_by_id(current_user):
     if request.method == "GET":
@@ -245,7 +245,7 @@ def post_by_id(current_user):
 
 
 # EDIT POST
-@application.route("/edit-post", methods=["POST"])
+@app.route("/edit-post", methods=["POST"])
 @token_required
 def edit_post(current_user):
     json_object = request.json
@@ -275,7 +275,7 @@ def edit_post(current_user):
 
 
 # DELETE POST
-@application.route("/delete-post", methods=["POST"])
+@app.route("/delete-post", methods=["POST"])
 @token_required
 def delete_post(current_user):
     json_object = request.json
@@ -291,7 +291,7 @@ def delete_post(current_user):
 
 
 #  ALL POSTS OF A SPECIFIC USER
-@application.route("/user-post", methods=["POST"])
+@app.route("/user-post", methods=["POST"])
 @token_required
 def user_post(current_user):
     if request.method == "POST":
@@ -302,7 +302,7 @@ def user_post(current_user):
 
 
 # COMMENT
-@application.route("/post/comments", methods=["POST"])
+@app.route("/post/comments", methods=["POST"])
 @token_required
 def add_comment(current_user):
     json_object = request.json
@@ -324,7 +324,7 @@ def add_comment(current_user):
 
 
 # LIKE
-@application.route("/post/like", methods=["POST"])
+@app.route("/post/like", methods=["POST"])
 @token_required
 def like(current_user):
     json_object = request.json
@@ -352,7 +352,7 @@ def like(current_user):
 
 
 # BOOKMARK
-@application.route("/post/bookmark", methods=["POST"])
+@app.route("/post/bookmark", methods=["POST"])
 @token_required
 def bookmark(current_user):
     json_object = request.json
@@ -382,7 +382,7 @@ def bookmark(current_user):
 
 # ------------------------------- INTERNSHIP API -------------------------------
 
-@application.route("/internships", methods=["POST"])
+@app.route("/internships", methods=["POST"])
 @token_required
 def fetch_internships(current_user):
     json_object = request.json
@@ -397,5 +397,6 @@ def fetch_internships(current_user):
 
 
 if __name__ == "__main__":
-    application.run(debug=True)
+    app.run(debug=True)
+
 
