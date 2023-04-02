@@ -27,6 +27,7 @@ login_info = Database.logininfo
 post_info = Database.Postinfo
 internships = Database.Internships
 
+
 # ------------------------------- TOOLS -------------------------------
 
 # Verifying the JWT token and then sending relevant information
@@ -90,7 +91,7 @@ def hashed_password(s):
 
 @app.route("/")
 def hello_world():
-    return "Hello! This is APSIT - Community's Backend"
+    return "Hi! I am APSIT - Community's Backend"
 
 
 # CREATE ACCOUNT
@@ -223,8 +224,7 @@ def get_posts(current_user):
         posts = post_info.find({}, {
             "cover": 0, "content": 0,
             "author.avatarUrl": 0,
-            "author.moodleId": 0,
-            "comment": 0
+            "author.moodleId": 0
         }).sort("_id", -1)
 
         posts_json = jsoner(posts)
@@ -292,7 +292,7 @@ def delete_post(current_user):
 #  ALL POSTS OF A SPECIFIC USER
 @app.route("/user-post", methods=["POST"])
 @token_required
-def user_post(current_user):
+def user_post():
     if request.method == "POST":
         json_object = request.json
         post = post_info.find({"author.moodleId": json_object['moodleId']}).sort("_id", -1)
@@ -313,10 +313,9 @@ def add_comment(current_user):
 
         if post:
 
-
             # Adding the comment into relevant field in the document
             post_info.update_one({"_id": bson_post_id}, {"$push": {"comment": json_object}})
-          
+            post_info.update_one({"_id": bson_post_id}, {"$set": {"totalComments": int(len(post["comment"])) + 1}})
 
             return jsonify({"message": "Comment added successfully"}), 200
         else:
@@ -327,11 +326,10 @@ def add_comment(current_user):
 @app.route("/post/like", methods=["POST"])
 @token_required
 def like(current_user):
-    
     json_object = request.json
-    
+
     if request.method == "POST":
-        
+
         post_id = json_object["postId"]
         bson_post_id = bson.ObjectId(post_id)
         post = post_info.find_one(bson_post_id)
@@ -345,8 +343,6 @@ def like(current_user):
 
             else:
                 post_info.update_one({"_id": bson_post_id}, {"$push": {"like": json_object["moodleId"]}}, upsert=False)
-                post_info.update_one({"_id": bson_post_id}, {"$set": {"totalComments": int(len(post["comment"])) + 1}})
-
 
                 return jsonify({"message": "Post liked"})
 
@@ -386,8 +382,8 @@ def bookmark(current_user):
 # ------------------------------- INTERNSHIP API -------------------------------
 
 @app.route("/internships", methods=["POST"])
-@token_required
-def fetch_internships(current_user):
+# @token_required
+def fetch_internships():
     json_object = request.json
 
     if request.method == "POST":
