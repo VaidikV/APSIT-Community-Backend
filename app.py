@@ -270,7 +270,6 @@ def edit_post(current_user):
 
             if profanity.contains_profanity(post_title) or profanity.contains_profanity(post_description) \
                     or profanity.contains_profanity(post_content):
-                profane_content.insert_one(json_object)
                 return jsonify({"message": "Profane content detected"}), 401
             else:
 
