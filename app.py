@@ -262,24 +262,21 @@ def edit_post(current_user):
 
     if request.method == "POST":
         post_id = json_object["id"]
+        post_title = json_object["title"]
+        post_description = json_object["description"]
+        post_content = json_object["content"]
 
         if post_info.find_one(ObjectId(post_id)):
 
-            edited_post = {
-                "title": json_object["title"],
-                "description": json_object["description"],
-                "content": json_object["content"],
-                "cover": json_object["cover"],
-                "tags": json_object["tags"],
-                "publish": json_object["publish"],
-                "comments": json_object["comments"],
-                "metaTitle": json_object["metaTitle"],
-                "metaDescription": json_object["metaDescription"],
-                "metaKeywords": json_object["metaKeywords"]
-            }
-            post_info.update_one({"_id": bson.ObjectId(post_id)}, {"$set": edited_post}, upsert=False)
-
-            return jsonify({"message": "Post updated successfully"}), 200
+            if profanity.contains_profanity(post_title) or profanity.contains_profanity(post_description) \
+                    or profanity.contains_profanity(post_content):
+                profane_content.insert_one(json_object)
+                return jsonify({"message": "Profane content detected"}), 401
+            else:
+                
+                post_info.update_one({"_id": bson.ObjectId(post_id)}, {"$set": json_object}, upsert=False)
+    
+                return jsonify({"message": "Post updated successfully"}), 200
         else:
             return jsonify({"message": "Post does not exist"}), 201
 
