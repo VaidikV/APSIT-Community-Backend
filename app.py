@@ -9,7 +9,7 @@ from functools import wraps
 import jwt
 import os
 from datetime import datetime, timedelta
-
+from better_profanity import profanity
 
 # FLASK CONFIG
 app = Flask(__name__)
