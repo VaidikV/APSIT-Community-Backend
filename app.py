@@ -273,8 +273,20 @@ def edit_post(current_user):
                 profane_content.insert_one(json_object)
                 return jsonify({"message": "Profane content detected"}), 401
             else:
-                
-                post_info.update_one({"_id": bson.ObjectId(post_id)}, {"$set": json_object}, upsert=False)
+
+                edited_post = {
+                    "title": json_object["title"],
+                    "description": json_object["description"],
+                    "content": json_object["content"],
+                    "cover": json_object["cover"],
+                    "tags": json_object["tags"],
+                    "publish": json_object["publish"],
+                    "comments": json_object["comments"],
+                    "metaTitle": json_object["metaTitle"],
+                    "metaDescription": json_object["metaDescription"],
+                    "metaKeywords": json_object["metaKeywords"]
+                }
+                post_info.update_one({"_id": bson.ObjectId(post_id)}, {"$set": edited_post}, upsert=False)
     
                 return jsonify({"message": "Post updated successfully"}), 200
         else:
