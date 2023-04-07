@@ -55,10 +55,10 @@ def token_required(f):
 
             if current_user is None:
                 return {
-                           "message": "Invalid Authentication token!",
-                           "data": None,
-                           "error": "Unauthorized"
-                       }, 401
+                    "message": "Invalid Authentication token!",
+                    "data": None,
+                    "error": "Unauthorized"
+                }, 401
 
         except Exception as e:
             return jsonify({
@@ -215,7 +215,14 @@ def create_post(current_user):
 
         if profanity.contains_profanity(post_title) or profanity.contains_profanity(post_description) \
                 or profanity.contains_profanity(post_content):
-            profane_content.insert_one(new_post)
+
+            profane_content.insert_one({"message": "Profane content detected while creating a post",
+                                        "author": new_post["author"],
+                                        "title": new_post["title"],
+                                        "description": new_post["description"],
+                                        "content": new_post["content"],
+                                        "createdAt": new_post["createdAt"]})
+
             return jsonify({"message": "Profane content detected"}), 401
         else:
             post_info.insert_one(new_post)
@@ -270,6 +277,15 @@ def edit_post(current_user):
 
             if profanity.contains_profanity(post_title) or profanity.contains_profanity(post_description) \
                     or profanity.contains_profanity(post_content):
+
+                profane_content.insert_one({"message": "Profane content detected while editing a post",
+                                            "postId": json_object["id"],
+                                            "author": json_object["author"],
+                                            "title": json_object["title"],
+                                            "description": json_object["description"],
+                                            "content": json_object["content"],
+                                            "createdAt": json_object["createdAt"]})
+
                 return jsonify({"message": "Profane content detected"}), 401
             else:
 
@@ -286,7 +302,7 @@ def edit_post(current_user):
                     "metaKeywords": json_object["metaKeywords"]
                 }
                 post_info.update_one({"_id": bson.ObjectId(post_id)}, {"$set": edited_post}, upsert=False)
-    
+
                 return jsonify({"message": "Post updated successfully"}), 200
         else:
             return jsonify({"message": "Post does not exist"}), 201
@@ -408,7 +424,6 @@ def fetch_internships(current_user):
     json_object = request.json
 
     if request.method == "POST":
-
         domain = json_object["domain"]
         internship_in_db = internships.find({"domain": domain})
         internships_json = jsoner(internship_in_db)
@@ -418,4 +433,3 @@ def fetch_internships(current_user):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
