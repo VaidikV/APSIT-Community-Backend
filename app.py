@@ -205,8 +205,8 @@ def delete_user(current_user):
 
 # CREATE
 @app.route("/create-post", methods=["POST"])
-# @token_required
-def create_post():
+@token_required
+def create_post(current_user):
     if request.method == "POST":
         new_post = request.json
         post_title = new_post["title"]
@@ -313,8 +313,8 @@ def user_post(current_user):
 
 # COMMENT
 @app.route("/post/comments", methods=["POST"])
-# @token_required
-def add_comment():
+@token_required
+def add_comment(current_user):
     json_object = request.json
 
     if request.method == "POST":
@@ -410,3 +410,4 @@ def fetch_internships(current_user):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
