@@ -26,6 +26,7 @@ Database = client.get_database("ApsitDB")
 login_info = Database.logininfo
 post_info = Database.Postinfo
 internships = Database.Internships
+profane_content = Database.ProfaneContent
 
 
 # ------------------------------- TOOLS -------------------------------
@@ -154,7 +155,7 @@ def find_user():
                 access_token = jwt.encode(
                     {
                         "user": json_object["moodleId"],
-                        "exp": datetime.utcnow() + timedelta(hours=2)
+                        "exp": datetime.utcnow() + timedelta(hours=6)
                     },
                     app.config["SECRET_KEY"]
                 )
@@ -208,12 +209,21 @@ def delete_user(current_user):
 def create_post(current_user):
     if request.method == "POST":
         new_post = request.json
-        post_info.insert_one(new_post)
-        new_post_json = jsoner(new_post)
+        post_title = new_post["title"]
+        post_description = new_post["description"]
+        post_content = new_post["content"]
 
-        # storing the received json message in a variable so that the post id can be returned
-        post = {"post": new_post_json}
-        return {"_id": post["post"]["_id"]["$oid"]}, 201
+        if profanity.contains_profanity(post_title) or profanity.contains_profanity(post_description) \
+                or profanity.contains_profanity(post_content):
+            profane_content.insert_one(new_post)
+            return jsonify({"message": "Profane content detected"}), 401
+        else:
+            post_info.insert_one(new_post)
+            new_post_json = jsoner(new_post)
+
+            # storing the received json message in a variable so that the post id can be returned
+            post = {"post": new_post_json}
+            return {"_id": post["post"]["_id"]["$oid"]}, 201
 
 
 # READ
@@ -313,12 +323,14 @@ def add_comment(current_user):
         post = post_info.find_one(bson_post_id)
 
         if post:
-
-            # Adding the comment into relevant field in the document
-            post_info.update_one({"_id": bson_post_id}, {"$push": {"comment": json_object}})
-            post_info.update_one({"_id": bson_post_id}, {"$set": {"totalComments": int(len(post["comment"])) + 1}})
-
-            return jsonify({"message": "Comment added successfully"}), 200
+            if profanity.contains_profanity(json_object["message"]):
+                profane_content.insert_one(json_object)
+                return jsonify({"message": "Profane content detected"}), 401
+            else:
+                # Adding the comment into relevant field in the document
+                post_info.update_one({"_id": bson_post_id}, {"$push": {"comment": json_object}})
+                post_info.update_one({"_id": bson_post_id}, {"$set": {"totalComments": int(len(post["comment"])) + 1}})
+                return jsonify({"message": "Comment added successfully"}), 200
         else:
             return jsonify({"message": "Post not found"}), 401
 
@@ -398,5 +410,4 @@ def fetch_internships(current_user):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
