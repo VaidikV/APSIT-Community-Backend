@@ -419,7 +419,7 @@ def bookmark(current_user):
 # REPORT POST
 @app.route("/post/report", methods=["POST"])
 @token_required
-def like(current_user):
+def report(current_user):
     json_object = request.json
 
     if request.method == "POST":
