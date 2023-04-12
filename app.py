@@ -27,7 +27,7 @@ login_info = Database.logininfo
 post_info = Database.Postinfo
 internships = Database.Internships
 profane_content = Database.ProfaneContent
-
+News = Database.News
 
 # ------------------------------- TOOLS -------------------------------
 
@@ -429,6 +429,14 @@ def fetch_internships(current_user):
         internships_json = jsoner(internship_in_db)
 
         return jsonify({"internships": internships_json})
+    
+  
+# ------------------------------- NEWS API -------------------------------
+@app.route("/news", methods=["POST"])
+# @token_required
+def fetch_news():
+        news = News.find()
+        return jsonify([item for item in news])
 
 
 if __name__ == "__main__":
