@@ -416,6 +416,28 @@ def bookmark(current_user):
             return jsonify({"message": "Invalid Moodle ID received"})
 
 
+# REPORT POST
+@app.route("/post/report", methods=["POST"])
+@token_required
+def like(current_user):
+    json_object = request.json
+
+    if request.method == "POST":
+        flagged_content.insert_one(json_object)
+        return jsonify({"message": "Post Reported"})
+
+
+# CALENDER
+@app.route("/api/calendar/events/new", methods=["POST"])
+@token_required
+def event(current_user):
+    json_object = request.json
+
+    if request.method == "POST":
+        flagged_content.insert_one(json_object)
+        return jsonify({"message": "Event added"})
+    
+    
 # ------------------------------- INTERNSHIP API -------------------------------
 
 @app.route("/internships", methods=["POST"])
@@ -432,9 +454,9 @@ def fetch_internships(current_user):
     
   
 # ------------------------------- NEWS API -------------------------------
-@app.route("/news", methods=["POST"])
-# @token_required
-def fetch_news():
+@app.route("/news/all", methods=["POST"])
+@token_required
+def fetch_news(current_user):
         News = news.find()
         return jsonify([item for item in News])
 
