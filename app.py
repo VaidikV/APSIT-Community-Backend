@@ -428,7 +428,7 @@ def report(current_user):
 
 
 # CALENDER
-@app.route("/calendar/events/", methods=["POST"])
+@app.route("/calendar/events", methods=["POST"])
 @token_required
 def event(current_user):
     json_object = request.json
