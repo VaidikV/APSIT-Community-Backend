@@ -424,8 +424,23 @@ def report(current_user):
     json_object = request.json
 
     if request.method == "POST":
-        flagged_content.insert_one(json_object)
-        return jsonify({"message": "Post Reported"})
+
+        post_id = json_object["postId"]
+        moodle_id = json_object["moodleId"]
+        post_in_db = flagged_content.find_one({"postId": post_id})
+
+        if post_in_db:
+            if moodle_id in post_in_db["moodleId"]:
+                return jsonify({"message": "You have already reported this post"}), 401
+
+            else:
+                flagged_content.update_one({"postId": post_id}, {"$push": {"moodleId": moodle_id}}, upsert=False)
+
+                return jsonify({"message": "Post reported"}), 200
+
+        else:
+            flagged_content.insert_one(json_object)
+            return jsonify({"message": "Post reported"}), 200
 
 
 # CALENDER
