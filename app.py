@@ -28,6 +28,7 @@ post_info = Database.Postinfo
 internships = Database.Internships
 profane_content = Database.ProfaneContent
 news = Database.News
+flagged_content = Database.FlaggedContent
 
 # ------------------------------- TOOLS -------------------------------
 
