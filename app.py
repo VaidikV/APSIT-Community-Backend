@@ -431,7 +431,7 @@ def report(current_user):
 
         if post_in_db:
             if moodle_id in post_in_db["moodleId"]:
-                return jsonify({"message": "You have already reported this post"}), 401
+                return jsonify({"message": "You have already reported this post"}), 208
 
             else:
                 flagged_content.update_one({"postId": post_id}, {"$push": {"moodleId": moodle_id}}, upsert=False)
@@ -473,9 +473,14 @@ def fetch_internships(current_user):
 @app.route("/news/all", methods=["POST"])
 @token_required
 def fetch_news(current_user):
-        News = news.find()
+        News = news.find().limit(10)
         return jsonify([item for item in News])
 
 
+    
+    
+    
+    
+    
 if __name__ == "__main__":
     app.run(debug=True)
