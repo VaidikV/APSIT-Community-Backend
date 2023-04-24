@@ -470,7 +470,7 @@ def fetch_internships(current_user):
     
   
 # ------------------------------- NEWS API -------------------------------
-@app.route("/news/all", methods=["POST"])
+@app.route("/news/all", methods=["GET"])
 @token_required
 def fetch_news(current_user):
         News = news.find().limit(10)
