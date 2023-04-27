@@ -200,6 +200,104 @@ def delete_user(current_user):
         else:
             return jsonify({"message": "User does not exist"}), 204
 
+# ------------------------------ CALENDAR AND EVENTS --------------------------------
+
+# ADD EVENT
+@app.route("/add-event", methods=["POST"])
+@token_required
+def add_event(current_user):
+    if request.method == "POST":
+        token = request.headers.get("Authorization").split()[1]
+        data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
+        moodle_id = data["user"]
+        event = request.json
+        event_title = event["title"]
+        event_description = event["description"]
+        # event_start = event["start"]
+        # event_end = event["end"]
+        
+
+        if profanity.contains_profanity(event_title) or profanity.contains_profanity(event_description):
+            return jsonify({"message": "Profane content detected"}), 401
+        else:
+            user = login_info.find_one({"moodleId": moodle_id})
+            if user:
+                del event["moodleId"]
+                login_info.update_one({"moodleId": moodle_id}, {"$push": {"event": event}}, upsert=False)
+                return jsonify({"message": "event added successfully"})
+            else:
+                return jsonify({"message":"User not found"})
+
+
+
+# UPDATE EVENT
+# @app.route("/update-event", methods=["POST"])
+# @token_required
+# def update_event(current_user):
+#     if request.method == "POST":
+#         token = request.headers.get("Authorization").split()[1]
+#         data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
+#         moodle_id = data["user"]
+#         event = request.json
+#         event_title = event["title"]
+#         event_description = event["description"]
+#         event_start = event["start"]
+#         event_end = event["end"]
+
+#         if profanity.contains_profanity(event_title) or profanity.contains_profanity(event_description):
+#             return jsonify({"message": "Profane content detected"}), 401
+#         else:
+#             user = login_info.find_one({"moodleId": moodle_id})
+#             if user:
+                
+#                 login_info.update_one({"moodleId": moodle_id}, {"$push": {"event": event}}, upsert=False)
+#                 return jsonify({"message": "event added successfully"})
+#             else:
+#                 return jsonify({"message":"User not found"})
+
+
+
+# DELETE EVENT
+@app.route("/delete-event", methods=["POST"])
+@token_required
+def delete_event(current_user):
+    if request.method == "POST":
+        token = request.headers.get("Authorization").split()[1]
+        data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
+        moodle_id = data["user"]
+        json_object = request.json
+        event_start = json_object["start"]
+        event_end = json_object["end"]
+        title = json_object["title"]
+
+        user = login_info.find_one({"moodleId":moodle_id})
+        if user:
+            for item in user["event"]:
+                if item["start"]==event_start and item["end"]==event_end and item["title"]==title:
+                    user["event"].remove(item)  
+                    login_info.update_one({"moodleId": moodle_id}, {"$set": {"event": user["event"]}}) 
+                    return {"message": "Event deleted successfully."}
+                else:
+                    continue
+            else:
+                return jsonify({"messsage":"Event not found"})
+
+
+
+#  READ EVENT
+@app.route("/events", methods=["POST"])
+@token_required
+def events(currrent_user):
+    if request.method == "POST":
+        token = request.headers.get("Authorization").split()[1]
+        data = jwt.decode(token, app.config["SECRET_KEY"], algorithms="HS256")
+        moodle_id = data["user"]
+        user = login_info.find_one({"moodleId": moodle_id})
+        if user:
+            return jsonify(jsoner([item for item in user["event"]]))
+
+
+
 
 # ------------------------------- POST API -------------------------------
 
