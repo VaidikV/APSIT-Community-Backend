@@ -28,6 +28,7 @@ post_info = Database.Postinfo
 internships = Database.Internships
 profane_content = Database.ProfaneContent
 news = Database.News
+flagged_content = Database.FlaggedContent
 
 # ------------------------------- TOOLS -------------------------------
 
@@ -423,12 +424,27 @@ def report(current_user):
     json_object = request.json
 
     if request.method == "POST":
-        flagged_content.insert_one(json_object)
-        return jsonify({"message": "Post Reported"})
+
+        post_id = json_object["postId"]
+        moodle_id = json_object["moodleId"]
+        post_in_db = flagged_content.find_one({"postId": post_id})
+
+        if post_in_db:
+            if moodle_id in post_in_db["moodleId"]:
+                return jsonify({"message": "You have already reported this post"}), 208
+
+            else:
+                flagged_content.update_one({"postId": post_id}, {"$push": {"moodleId": moodle_id}}, upsert=False)
+
+                return jsonify({"message": "Post reported"}), 200
+
+        else:
+            flagged_content.insert_one(json_object)
+            return jsonify({"message": "Post reported"}), 200
 
 
 # CALENDER
-@app.route("/api/calendar/events/new", methods=["POST"])
+@app.route("/calendar/events", methods=["POST"])
 @token_required
 def event(current_user):
     json_object = request.json
@@ -454,12 +470,17 @@ def fetch_internships(current_user):
     
   
 # ------------------------------- NEWS API -------------------------------
-@app.route("/news/all", methods=["POST"])
+@app.route("/news/all", methods=["GET"])
 @token_required
 def fetch_news(current_user):
-        News = news.find()
+        News = news.find().limit(10)
         return jsonify([item for item in News])
 
 
+    
+    
+    
+    
+    
 if __name__ == "__main__":
     app.run(debug=True)
