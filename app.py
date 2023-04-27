@@ -360,6 +360,45 @@ def add_comment(current_user):
             return jsonify({"message": "Post not found"}), 401
 
 
+# COMMENT REPLY
+@app.route("/post/replycomment", methods=["POST"])
+@token_required
+def reply_comment(current_user):
+    json_object = request.json
+
+    if request.method == "POST":
+        post_id = json_object["postId"]
+        bson_post_id = bson.ObjectId(post_id)
+        post = post_info.find_one(bson_post_id)
+        reply_comment_message = json_object["message"]
+        parent_comment_id = json_object["parentId"]
+        parent_comment = None
+
+        if post:
+
+            if profanity.contains_profanity(reply_comment_message):
+                profane_content.insert_one(json_object)
+                return jsonify({"message": "Profane content detected"}), 401
+            
+            else:
+                for comment in post["comment"]:
+                    if comment["id"] == parent_comment_id:
+                        parent_comment = comment
+                        break
+                    else:
+                        return jsonify({"message": "Parent comment not found"}), 401
+
+                parent_comment["replyComment"].append(json_object)
+
+                post_info.update_one({"_id": bson_post_id},
+                                     {"$set": {"comment": post["comment"]}})
+
+                return jsonify({"message": "Reply added successfully"}), 200
+
+        else:
+            return jsonify({"message": "Post not found"}), 401
+
+
 # LIKE
 @app.route("/post/like", methods=["POST"])
 @token_required
@@ -473,14 +512,8 @@ def fetch_internships(current_user):
 @app.route("/news/all", methods=["GET"])
 @token_required
 def fetch_news(current_user):
-        News = news.find().limit(10)
-        return jsonify([item for item in News])
-
-
-    
-    
-    
-    
+        all_news = news.find().limit(10)
+        return jsonify([item for item in all_news])
     
 if __name__ == "__main__":
     app.run(debug=True)
