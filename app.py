@@ -509,11 +509,13 @@ def fetch_internships(current_user):
     
   
 # ------------------------------- NEWS API -------------------------------
+
 @app.route("/news/all", methods=["GET"])
 @token_required
 def fetch_news(current_user):
-        all_news = news.find().limit(10)
-        return jsonify([item for item in all_news])
-    
+    all_news = news.find().limit(10)
+    return jsonify(jsoner([item for item in all_news]))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
