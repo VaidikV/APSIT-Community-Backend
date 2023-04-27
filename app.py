@@ -118,7 +118,8 @@ def add_user():
             "rollNumber": json_object["rollNumber"],
             "moodleId": json_object["moodleId"],
             "email": json_object["email"],
-            "password": hashed_password(json_object["password"])
+            "password": hashed_password(json_object["password"]),
+            "bookmark": json_object["bookmark"]
         }
 
         # appending the details in the db
