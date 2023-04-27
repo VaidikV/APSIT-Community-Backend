@@ -214,10 +214,7 @@ def add_event(current_user):
         event = request.json
         event_title = event["title"]
         event_description = event["description"]
-        # event_start = event["start"]
-        # event_end = event["end"]
-        
-
+      
         if profanity.contains_profanity(event_title) or profanity.contains_profanity(event_description):
             return jsonify({"message": "Profane content detected"}), 401
         else:
@@ -225,9 +222,9 @@ def add_event(current_user):
             if user:
                 del event["moodleId"]
                 login_info.update_one({"moodleId": moodle_id}, {"$push": {"event": event}}, upsert=False)
-                return jsonify({"message": "event added successfully"})
+                return jsonify({"message": "event added successfully"}), 200
             else:
-                return jsonify({"message":"User not found"})
+                return jsonify({"message":"User not found"}), 401
 
 
 
@@ -277,11 +274,11 @@ def delete_event(current_user):
                 if item["start"]==event_start and item["end"]==event_end and item["title"]==title:
                     user["event"].remove(item)  
                     login_info.update_one({"moodleId": moodle_id}, {"$set": {"event": user["event"]}}) 
-                    return {"message": "Event deleted successfully."}
+                    return {"message": "Event deleted successfully."}, 200
                 else:
                     continue
             else:
-                return jsonify({"messsage":"Event not found"})
+                return jsonify({"messsage":"Event not found"}), 401
 
 
 
@@ -295,7 +292,7 @@ def events(currrent_user):
         moodle_id = data["user"]
         user = login_info.find_one({"moodleId": moodle_id})
         if user:
-            return jsonify(jsoner([item for item in user["event"]]))
+            return jsonify(jsoner([item for item in user["event"]])), 200
 
 
 
