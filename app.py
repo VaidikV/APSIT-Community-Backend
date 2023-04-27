@@ -385,8 +385,6 @@ def reply_comment(current_user):
                     if comment["id"] == parent_comment_id:
                         parent_comment = comment
                         break
-                    else:
-                        return jsonify({"message": "Parent comment not found"}), 401
 
                 parent_comment["replyComment"].append(json_object)
 
